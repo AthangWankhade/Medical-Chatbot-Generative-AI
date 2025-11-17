@@ -4,8 +4,11 @@ flask
 pypdf
 python-dotenv
 pinecone[grpc]
+pymupdf
+langchain
 langchain-pinecone
 langchain_community
+langchain_text_splitters
 langchain_openai
 langchain_experimental
 

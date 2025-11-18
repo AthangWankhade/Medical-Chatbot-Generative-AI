@@ -3,263 +3,227 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Chatbot</title>
-
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,1,0"
-    />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <title>MediBot Chat</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* tiny helper styles so icons toggle nicely if your CSS doesn't */
-      #chatbot-toggler .material-symbols-rounded.close { display:none; }
-      .chatbot-popup.open #chatbot-toggler .material-symbols-rounded.close { display:inline; }
-      .chatbot-popup.open #chatbot-toggler .material-symbols-outlined { display:none; }
+      /* Simple scrollbar for chat */
+      #chat-box::-webkit-scrollbar,
+      #sidebar-content::-webkit-scrollbar {
+        width: 6px;
+      }
+      #chat-box::-webkit-scrollbar-thumb,
+      #sidebar-content::-webkit-scrollbar-thumb {
+        background-color: #4b5563; /* gray-600 */
+        border-radius: 20px;
+      }
     </style>
   </head>
-  <body>
-    <button id="chatbot-toggler" aria-label="Open chatbot">
-      <span class="material-symbols-outlined">mode_comment</span>
-      <span class="material-symbols-rounded close">close</span>
-    </button>
+  <body class="bg-gray-900 text-white font-sans">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <div class="w-64 bg-gray-800 p-4 flex flex-col flex-shrink-0">
+        <h1 class="text-2xl font-bold mb-4 flex-shrink-0">MediBot</h1>
+        <a
+          href="{{ url_for('new_chat') }}"
+          class="w-full text-left bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 mb-4 flex-shrink-0"
+        >
+          + New Chat
+        </a>
 
-    <div class="chatbot-popup" aria-hidden="true">
-      <!-- Chatbot Header -->
-      <div class="chat-header">
-        <div class="header-info">
-          <svg
-            class="chatbot-logo"
-            xmlns="http://www.w3.org/2000/svg"
-            width="50"
-            height="50"
-            viewBox="0 0 1024 1024"
+        <!-- Chat History List -->
+        <div class="flex flex-col flex-1 overflow-y-auto" id="sidebar-content">
+          <h2
+            class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2"
           >
-            <path
-              d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5zM867.2 644.5V453.1h26.5c19.4 0 35.1 15.7 35.1 35.1v121.1c0 19.4-15.7 35.1-35.1 35.1h-26.5zM95.2 609.4V488.2c0-19.4 15.7-35.1 35.1-35.1h26.5v191.3h-26.5c-19.4 0-35.1-15.7-35.1-35.1zM561.5 149.6c0 23.4-15.6 43.3-36.9 49.7v44.9h-30v-44.9c-21.4-6.5-36.9-26.3-36.9-49.7 0-28.6 23.3-51.9 51.9-51.9s51.9 23.3 51.9 51.9z"
-            ></path>
-          </svg>
-
-          <h2 class="logo-text">Chatbot</h2>
-        </div>
-        <button id="close-chatbot" class="material-symbols-rounded" aria-label="Minimize chatbot">
-          keyboard_arrow_down
-        </button>
-      </div>
-
-      <!-- Chatbot Body -->
-      <div class="chat-body" id="chat-body" role="log" aria-live="polite">
-        <div class="message bot-message">
-          <svg
-            class="bot-avatar"
-            xmlns="http://www.w3.org/2000/svg"
-            width="50"
-            height="50"
-            viewBox="0 0 1024 1024"
-          >
-            <path
-              d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5z"
-            ></path>
-          </svg>
-          <div class="message-text">
-            Hey there 👋 <br />
-            How can I help you today?
-          </div>
-        </div>
-      </div>
-
-      <!-- Chatbot Footer -->
-      <div class="chat-footer">
-        <form id="chat-form" class="chat-form" action="#" autocomplete="off">
-          <textarea
-            id="message-input"
-            name="msg"
-            placeholder="Message..."
-            class="message-input"
-            rows="2"
-            required
-          ></textarea>
-          <div class="chat-controls">
-            <button
-              type="button"
-              id="emoji-picker"
-              class="material-symbols-rounded"
-              title="Emoji (not implemented)"
+            Chat History
+          </h2>
+          <nav class="flex-1 space-y-1">
+            <!-- 
+                    Iterate over the chat_summaries passed from Flask.
+                    Highlight the current_chat_id.
+                    -->
+            {% for chat in chat_summaries %}
+            <a
+              href="{{ url_for('load_chat', chat_id=chat.id) }}"
+              class="w-full text-left block py-2 px-3 rounded-lg transition duration-200 truncate {% if chat.id == current_chat_id %} bg-gray-700 text-white {% else %} text-gray-300 hover:bg-gray-700 hover:text-white {% endif %}"
+              title="{{ chat.title }}"
             >
-              sentiment_satisfied
-            </button>
+              {{ chat.title }}
+            </a>
+            {% endfor %}
+          </nav>
+        </div>
+      </div>
 
-            <div class="file-upload-wrapper">
-              <input type="file" accept="images/*" id="file-input" hidden />
-              <button
-                type="button"
-                id="file-upload"
-                class="material-symbols-rounded"
-                title="Attach file (not uploaded to server)"
-              >
-                attach_file
-              </button>
+      <!-- Main Chat Area -->
+      <div class="flex-1 flex flex-col">
+        <!-- Chat Header -->
+        <header class="bg-gray-800 p-4 text-lg font-semibold shadow-md z-10">
+          MediBot Assistant
+        </header>
+
+        <!-- Chat Messages -->
+        <main id="chat-box" class="flex-1 p-4 overflow-y-auto bg-gray-900">
+          <div class="max-w-3xl mx-auto">
+            <!--
+                    Messages will be rendered here by the template engine.
+                    This part remains the same.
+                    -->
+            {% for message in chat_history %} {% if message.role == 'user' %}
+            <div class="mb-4 flex justify-end">
+              <div class="bg-blue-600 text-white rounded-lg p-3 max-w-lg">
+                <pre class="font-sans whitespace-pre-wrap">
+{{ message.content }}</pre
+                >
+              </div>
             </div>
+            {% else %}
+            <!-- 'assistant' -->
+            <div class="mb-4 flex justify-start">
+              <div class="bg-gray-700 text-white rounded-lg p-3 max-w-lg">
+                <pre class="font-sans whitespace-pre-wrap">
+{{ message.content }}</pre
+                >
+              </div>
+            </div>
+            {% endif %} {% endfor %}
 
-            <button
-              type="submit"
-              id="send-message"
-              class="material-symbols-rounded"
-              title="Send"
-            >
-              arrow_upward
-            </button>
+            <!-- This is where new messages will be appended by JS -->
+            <div id="chat-end"></div>
           </div>
-        </form>
+        </main>
+
+        <!-- Input Bar -->
+        <footer class="bg-gray-800 p-4 shadow-inner">
+          <div class="max-w-3xl mx-auto">
+            <form id="chat-form" class="flex items-center space-x-2">
+              <input
+                type="text"
+                id="message-input"
+                placeholder="Ask your medical question..."
+                class="flex-1 p-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autocomplete="off"
+              />
+              <button
+                type="submit"
+                id="send-button"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-200"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+        </footer>
       </div>
     </div>
 
-    <!-- optional emoji mart script (kept, but not required) -->
-    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-
-    <!-- Inline JS: no external script.js required -->
     <script>
-      (function () {
-        // Elements
-        const toggler = document.getElementById("chatbot-toggler");
-        const popup = document.querySelector(".chatbot-popup");
-        const closeBtn = document.getElementById("close-chatbot");
-        const chatBody = document.getElementById("chat-body");
-        const form = document.getElementById("chat-form");
-        const input = document.getElementById("message-input");
-        const fileUploadBtn = document.getElementById("file-upload");
-        const fileInput = document.getElementById("file-input");
+      document.addEventListener("DOMContentLoaded", () => {
+        const chatBox = document.getElementById("chat-box");
+        const chatForm = document.getElementById("chat-form");
+        const messageInput = document.getElementById("message-input");
+        const sendButton = document.getElementById("send-button");
+        const chatEnd = document.getElementById("chat-end");
 
-        // Toggle open/close
-        toggler.addEventListener("click", () => {
-          popup.classList.toggle("open");
-          const isOpen = popup.classList.contains("open");
-          popup.setAttribute("aria-hidden", !isOpen);
-          toggler.setAttribute("aria-expanded", isOpen);
-          if (isOpen) {
-            // focus the input when opened
-            setTimeout(() => input.focus(), 100);
-          }
-        });
+        // Helper function to scroll to the bottom
+        function scrollToBottom() {
+          chatEnd.scrollIntoView({ behavior: "smooth" });
+        }
 
-        // minimize button
-        closeBtn.addEventListener("click", () => {
-          popup.classList.remove("open");
-          popup.setAttribute("aria-hidden", "true");
-          toggler.setAttribute("aria-expanded", "false");
-        });
+        // Scroll to bottom on page load
+        scrollToBottom();
 
-        // file upload (UI only)
-        fileUploadBtn.addEventListener("click", () => fileInput.click());
-        fileInput.addEventListener("change", () => {
-          const file = fileInput.files[0];
-          if (!file) return;
-          // show a preview message but do NOT upload (you can extend this)
-          addMessage("user", `📎 Attached ${file.name}`);
-          fileInput.value = "";
-        });
+        // Helper function to append a message to the chat UI
+        function appendMessage(role, content) {
+          const messageDiv = document.createElement("div");
+          messageDiv.classList.add("mb-4", "flex");
 
-        // helper to append messages
-        function addMessage(sender, text) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "message " + (sender === "bot" ? "bot-message" : "user-message");
+          const contentDiv = document.createElement("div");
+          contentDiv.classList.add("rounded-lg", "p-3", "max-w-lg");
 
-          if (sender === "bot") {
-            // bot avatar + text
-            wrapper.innerHTML = `
-              <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024"><path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9zM351.7 448.2c0-29.5 23.9-53.5 53.5-53.5s53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5-53.5-23.9-53.5-53.5zm157.9 267.1c-67.8 0-123.8-47.5-132.3-109h264.6c-8.6 61.5-64.5 109-132.3 109zm110-213.7c-29.5 0-53.5-23.9-53.5-53.5s23.9-53.5 53.5-53.5 53.5 23.9 53.5 53.5-23.9 53.5-53.5 53.5z"/></svg>
-              <div class="message-text">${escapeHtml(text).replace(/\n/g, "<br/>")}</div>
-            `;
+          // Use <pre> to respect newlines and formatting for both user and bot
+          const pre = document.createElement("pre");
+          pre.classList.add("font-sans", "whitespace-pre-wrap");
+          pre.textContent = content;
+
+          if (role === "user") {
+            messageDiv.classList.add("justify-end");
+            contentDiv.classList.add("bg-blue-600", "text-white");
           } else {
-            // user message (no avatar)
-            wrapper.innerHTML = `<div class="message-text">${escapeHtml(text).replace(/\n/g, "<br/>")}</div>`;
+            // assistant
+            messageDiv.classList.add("justify-start");
+            contentDiv.classList.add("bg-gray-700", "text-white");
           }
 
-          chatBody.appendChild(wrapper);
-          // scroll to bottom
-          chatBody.scrollTop = chatBody.scrollHeight;
+          contentDiv.appendChild(pre);
+          messageDiv.appendChild(contentDiv);
+          chatEnd.before(messageDiv); // Insert before the 'chat-end' anchor
         }
 
-        // small escape helper to avoid injected HTML
-        function escapeHtml(s) {
-          if (!s) return "";
-          return s
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-        }
+        // Handle form submission
+        chatForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const message = messageInput.value.trim();
+          if (!message) return;
 
-        // show typing indicator and return a function to remove it
-        function showTyping() {
-          const el = document.createElement("div");
-          el.className = "message bot-message typing";
-          el.innerHTML = `
-            <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 1024 1024"><path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1c0 .7.8 1.1 1.4.7l166.9-110.6 41.8-.8h117.4l43.6-.4c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9z"/></svg>
-            <div class="message-text">...</div>
-          `;
-          chatBody.appendChild(el);
-          chatBody.scrollTop = chatBody.scrollHeight;
-          return () => {
-            el.remove();
-          };
-        }
+          // 1. Display user message
+          appendMessage("user", message);
+          messageInput.value = "";
+          scrollToBottom();
 
-        // send message handler
-        async function sendMessage(text) {
-          const trimmed = text && text.trim();
-          if (!trimmed) return;
-
-          addMessage("user", trimmed);
-          input.value = "";
-          input.focus();
-
-          const removeTyping = showTyping();
+          // 2. Show loading state
+          sendButton.disabled = true;
+          sendButton.textContent = "...";
 
           try {
-            const resp = await fetch("/get", {
+            // 3. Send message to backend
+            // The /get endpoint will automatically use the current chat
+            // ID stored in the session by the backend.
+            const response = await fetch("/get", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ msg: trimmed }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ msg: message }),
             });
 
-            if (!resp.ok) {
-              throw new Error("Network response was not ok: " + resp.status);
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                errorData.details || "Network response was not ok"
+              );
             }
 
-            const data = await resp.json();
-            const answer = data.answer ?? JSON.stringify(data);
-            removeTyping();
-            addMessage("bot", answer);
-          } catch (err) {
-            removeTyping();
-            addMessage("bot", "Sorry — something went wrong. " + (err.message || ""));
-            console.error(err);
-          }
-        }
+            const data = await response.json();
 
-        // form submit
-        form.addEventListener("submit", (e) => {
-          e.preventDefault();
-          sendMessage(input.value);
-        });
+            // 4. Display bot response
+            appendMessage("assistant", data.answer);
 
-        // Enter to send, Shift+Enter for newline
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            form.requestSubmit();
-          }
-        });
-
-        // accessibility: focus on input when popup opened via keyboard
-        toggler.addEventListener("keydown", (e) => {
-          if ((e.key === "Enter" || e.key === " ") && !popup.classList.contains("open")) {
-            e.preventDefault();
-            toggler.click();
+            // 5. Check if this is the first message of a new chat
+            // If so, we need to refresh the sidebar to show the new title
+            const sidebarNav = document.querySelector("nav");
+            const firstChatTitle = sidebarNav.querySelector("a > pre");
+            if (firstChatTitle && firstChatTitle.textContent === "New Chat") {
+              // This is a simple way to reload the page and update the sidebar
+              // A more advanced (but complex) solution would use JS
+              // to fetch summaries and rebuild the nav.
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            appendMessage(
+              "assistant",
+              "Sorry, something went wrong. " + error.message
+            );
+          } finally {
+            // 6. Restore button state
+            sendButton.disabled = false;
+            sendButton.textContent = "Send";
+            scrollToBottom();
           }
         });
-      })();
+      });
     </script>
   </body>
 </html>

@@ -16,11 +16,22 @@ def load_pdf_file(data):
     return documents
 
 
+# def text_split(data):
+#     text_splitter = RecursiveCharacterTextSplitter(
+#         chunk_size=1200,
+#         chunk_overlap=50)
+#     text_chunks = text_splitter.split_documents(extracted_data)
+#     return text_chunks
+
 def text_split(data):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=20)
-    text_chunks = text_splitter.split_documents(extracted_data)
+        chunk_size=1200,
+        chunk_overlap=50)
+
+    # --- CORRECTED LINE ---
+    text_chunks = text_splitter.split_documents(data)  # Use 'data'
+    # --- END CORRECTION ---
+
     return text_chunks
 
 

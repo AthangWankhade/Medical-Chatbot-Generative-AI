@@ -1,9 +1,16 @@
-from src.helper import load_pdf_file, text_split, download_hugging_face_embeddings
-from pinecone.grpc import PineconeGRPC as Pinecone
-from pinecone import ServerlessSpec
-from langchain_pinecone import PineconeVectorStore
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+from langchain_pinecone import PineconeVectorStore
+# --- CORRECT IMPORTS ---
+# Use the single, modern Pinecone import
+from pinecone import Pinecone, ServerlessSpec
+
+from src.helper import (download_hugging_face_embeddings, load_pdf_file,
+                        text_split)
+
+# --- END CORRECTIONS ---
+
 
 load_dotenv()
 
@@ -17,7 +24,7 @@ embeddings = download_hugging_face_embeddings()
 pc = Pinecone(
     api_key=PINECONE_API_KEY)
 
-index_name="medibot"
+index_name = "medibot"
 
 pc.create_index(
     name=index_name,
@@ -34,4 +41,3 @@ docsearch = PineconeVectorStore.from_documents(
     index_name=index_name,
     embedding=embeddings
 )
-
